@@ -88,6 +88,166 @@ TRANSLATE_TLS_VERSION = {
 }
 
 
+CipherSuite = collections.namedtuple('CipherSuite', 'prefix kea auth enc mode hash secure export name')
+CipherKEA = collections.namedtuple('CipherKEA', 'name family elliptic ephemeral')
+CipherAuth = collections.namedtuple('CipherAuth', 'name family secure')
+CipherEnc = collections.namedtuple('CipherEnc', 'name family bits type secure')
+CipherMode = collections.namedtuple('CipherMode', 'name aead ae')
+CipherHash = collections.namedtuple('CipherHash', 'name family bits secure')
+
+NULL_MODE = CipherMode(None, False, False),
+
+# XXX review names and values
+CIPHER_SUITE_PARTS = {
+    'kea': {
+        'DHE': CipherKEA('DHE', 'DH', False, True),
+        'DH': CipherKEA('DH', 'DH', False, False),
+        'ECDHE': CipherKEA('ECDHE', 'DH', True, True),
+        'ECDH': CipherKEA('ECDH', 'DH', True, False),
+        # 'FORTEZZA_KEA',
+        # 'GOST',
+        # 'GOST94',
+        # 'GOST01',
+        # 'GOST2001',
+        'SRP_SHA': CipherKEA('SRP_SHA', 'PAKE', False, False),  # KEA and auth with PAKE
+        'RSA': CipherKEA('RSA', 'kRSA', False, False),
+    },
+    'auth': {
+        'DSS_EXPORT': CipherAuth('DSS_EXPORT', 'DSS', False),
+        'DSS': CipherAuth('DSS', 'DSS', False),
+        'ECDSA': CipherAuth('ECDSA', 'ECDSA', True),
+        'KRB5': CipherAuth('KRB5', 'KRB5', None),
+        'KRB5_EXPORT': CipherAuth('KRB_EXPORT', 'KRB', False),
+        'NULL': CipherAuth('NULL', 'aNULL', False),
+        'PSK': CipherAuth('PSK', 'PAKE', None),
+        'PSK_DHE': CipherAuth('PSK_DHE', 'PAKE', None),  # reversed order
+        'RSA': CipherAuth('RSA', 'aRSA', True),
+        'RSA_EXPORT': CipherAuth('RSA_EXPORT', 'aRSA', False),
+        'RSA_FIPS': CipherAuth('RSA_FIPS', 'aRSA', None),
+        'SRP_SHA': CipherAuth('SRP_SHA', 'PAKE', None),  # KEA and auth with PAKE
+        'anon_EXPORT': CipherAuth('anon_EXPORT', 'aNULL', False),
+        'anon': CipherAuth('anon', 'aNULL', False),
+    },
+    'enc': {
+        '3DES_EDE': CipherEnc('3DES_EDE', '3DES', 168, 'block', False),  # Triple-DES encrypt/decrypt/encrypt
+        'AES_128': CipherEnc('AES_128', 'AES', 128, 'block', True),
+        'AES_256': CipherEnc('AES_256', 'AES', 256, 'block', True),
+        'ARIA_128': CipherEnc('ARIA_128', 'ARIA', 'block', 128, False),
+        'ARIA_256': CipherEnc('ARIA_128', 'ARIA', 'block', 256, False),
+        'CAMELLIA_128': CipherEnc('CAMELLIA_128', 'block', 'CAMELLIA', 128, False),
+        'CAMELLIA_256': CipherEnc('CAMELLIA_256', 'block', 'CAMELLIA', 256, False),
+        'CHACHA20' : CipherEnc('CHACHA20', 'CHACHA20', 'stream', 256, True),
+        'DES' : CipherEnc('DES', 'DES', 56, 'block', False),
+        'DES40': CipherEnc('DES40', 'DES', 40, 'block', False),  # also DES_CBC_40
+        'FORTEZZA': CipherEnc('FORTEZZA', 'SKIPJACK', 80, 'block', False),
+        'GOST89': CipherEnc('GOST89', 'GOST89', None, 'block', False),  # XXX block size?
+        # 'GOST2814789CNT',
+        # 'GOST2814789CNT12',
+        'IDEA': CipherEnc('IDEA', 'IDEA', 128, 'block', False),
+        'NULL': CipherEnc('NULL', 'eNULL', 0, None, False),
+        'RC2' : CipherEnc('RC2', 'RC2', 64, 'stream', False),
+        'RC2_40': CipherEnc('RC2_40', 'RC2_40', 40, 'stream', False),  # RC2_CBC_40
+        'RC4_128': CipherEnc('RC4_128', 'RC4', 'stream', 128, False),
+        'RC4_40': CipherEnc('RC4_40', 'RC4', 'stream', 40, False),
+        'SEED': CipherEnc('SEED', 'SEED', 128, 'block', False),
+    },
+    'mode': {
+        'CBC': CipherMode('CBC', False, False),
+        'CBC_40': CipherMode('CBC', False, False),
+        'CCM': CipherMode('CCM', False, True),
+        'CCM_8': CipherMode('CCM', False, True),
+        'GCM': CipherMode('GCM', True, True),
+        'POLY1305': CipherMode('POLY1305', True, True),
+    },
+    'hash': {
+        # 'GOST89MAC',
+        # 'GOST89MAC12',
+        # 'GOST94',
+        'NULL': CipherHash('NULL', None, 0, False),
+        'MD5': CipherHash('MD5', 'MD5', 128, False),
+        'SHA': CipherHash('SHA', 'SHA-1', 160, False),
+        'SHA256': CipherHash('SHA256', 'SHA-2', 256, True),
+        'SHA384': CipherHash('SHA384', 'SHA-2', 384, True),
+    },
+}
+
+CIPHER_SUITE_RE_TEMPLATE = (
+    r'^(?P<prefix>(TLS|SSL))_'
+    r'((?P<kea>({kea}))_)?'
+    r'(?P<auth>({auth}))_'
+    r'WITH_'
+    r'(?P<enc>({enc}))'
+    r'(_(?P<mode>({mode})))?'
+    r'(_(?P<hash>({hash})))?'
+    r'$'
+)
+
+CIPHER_SUITE_RE = re.compile(CIPHER_SUITE_RE_TEMPLATE.format(
+    **{key: '|'.join(sorted(values)) for key, values in CIPHER_SUITE_PARTS.items()}
+))
+
+
+def parse_suite(name, extended=False):
+    """Parse a TLS cipher suite name
+
+    :param name: TLS cipher suite
+    :return: dict
+    """
+    mo = CIPHER_SUITE_RE.match(name)
+    if mo is None:
+        raise ValueError(name)
+    cipher = mo.groupdict()
+    cipher['name'] = name
+    cipher['export'] = False
+    cipher['secure'] = None
+
+    # check for export auth
+    if cipher['auth'].endswith('_EXPORT'):
+        cipher['auth'] = cipher['auth'][:-7]
+        cipher['export'] = True
+
+    # anon is an alias for NULL
+    if cipher['auth'] == 'anon':
+        cipher['auth'] = 'NULL'
+
+    # without explicit key, suite uses same algorithm for KEA and auth
+    if not cipher['kea']:
+        cipher['kea'] = cipher['auth']
+
+    # CCM mode has implicit default TLS 1.2 PRF SHA256 (RFC 6655)
+    if cipher['hash'] is None and cipher['mode'] in {'CCM', 'CCM_8'}:
+        cipher['hash'] = 'SHA256'
+    # mode CBC_40 is CBC with 40 bit export encryption
+    if cipher['mode'] == 'CBC_40':
+        cipher['export'] = True
+        cipher['mode'] = 'CBC'
+        if cipher['enc'] == 'RC2':
+            cipher['enc'] = 'RC2_40'
+        elif cipher['enc'] == 'DES':
+            cipher['enc'] = 'DES40'
+        else:
+            raise ValueError(name, cipher['mode'], cipher['enc'])
+    # export encryption
+    if cipher['enc'] in {'DES40', 'RC2_40', 'RC4_40'}:
+        cipher['export'] = True
+
+    if extended:
+        for key, info in sorted(CIPHER_SUITE_PARTS.items()):
+            cur = cipher[key]
+            if key == 'mode' and cur is None:
+                value = NULL_MODE
+            elif key == 'kea':
+                value = info.get(cur, cur)
+            elif cur not in info:
+                raise ValueError(key, cipher.get(cur), cipher)
+            else:
+                value = info[cur]
+            cipher[key] = value
+        cipher['secure'] = not cipher['export'] and all(cipher[key].secure for key in ('auth', 'enc', 'hash'))
+
+    return CipherSuite(**cipher)
+
+
 def _format_hexid(hexid):
     if hexid[0:2] != '0x' or hexid[4:7] != ',0x':
         raise ValueError(hexid)
@@ -335,6 +495,8 @@ class TLSDB(object):
         self.indexes = {}
         # Mozilla server side TLS
         self.serverside = {}
+        # parsed IANA suites
+        self.suites = {}
         # extra fields
         self.fields = {
             'kea': set(),
@@ -585,9 +747,16 @@ class TLSDB(object):
         for hexid, serverside in hexid2serverside.items():
             self.ciphers[hexid]['mozilla_server_side'] = serverside
 
+    def parse_suite_strings(self):
+        for name, hexid in self.indexes['iana'].items():
+            if 'WITH' not in name:
+                continue
+            self.suites[hexid] = parse_suite(name, True)
+
     def process(self, refresh=False):
         self.download(refresh)
         self.parse_iana()
+        self.parse_suite_strings()
         self.parse_gnutls()
         self.parse_nss()
         self.parse_mod_nss()
@@ -596,6 +765,15 @@ class TLSDB(object):
         self.parse_serverside()
 
     def dump(self, file=None):
+        # JSON decoder doesn't dump namedtuples as dict
+        suites = {}
+        for hexid, suite in self.suites.items():
+            suite = suite._asdict()
+            for key, value in suite.items():
+                if hasattr(value, '_asdict'):
+                    suite[key] = value._asdict()
+            suites[hexid] = suite
+
         result = {
             'about': {
                 'author': 'Christian Heimes',
@@ -605,7 +783,8 @@ class TLSDB(object):
             },
             'ciphers': self.ciphers,
             'indexes': self.indexes,
-            'flags': {name: sorted(value) for name, value in self.fields.items()},
+            'flags': {name: sorted(value) for name, value in sorted(self.fields.items())},
+            'suites': suites,
         }
         if file is None:
             return json.dumps(result, sort_keys=True, indent=2)
@@ -619,3 +798,9 @@ if __name__ == '__main__':
     tlsdb.process()
     with open('tlsdb.json', 'w') as f:
         tlsdb.dump(f)
+    for name in sorted(tlsdb.indexes['iana']):
+        if 'WITH' not in name:
+            continue
+        suite = parse_suite(name, True)
+        if suite.secure and suite.mode.name != 'CCM':
+            print(suite.name)
