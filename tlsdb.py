@@ -74,15 +74,18 @@ TRANSLATE_TLS_VERSION = {
     'TLS1_VERSION': 'TLSv1.0',
     'TLS1_1_VERSION': 'TLSv1.1',
     'TLS1_2_VERSION': 'TLSv1.2',
+    'TLS1_3_VERSION': 'TLSv1.3',
     'DTLS1_VERSION': 'DTLSv1.0',
     'DTLS1_1_VERSION': 'DTLSv1.1',
     'DTLS1_2_VERSION': 'DTLSv1.2',
+    'DTLS1_3_VERSION': 'DTLSv1.3',
     'DTLS1_BAD_VER': 'DTLS1_BAD_VER',
     # NSS
     'SSLV3': 'SSLv3',
     'TLSV1': 'TLSv1.0',
     'TLSV1_1': 'TLSv1.1',
     'TLSV1_2': 'TLSv1.2',
+    'TLSV1_3': 'TLSv1.3',
     # invalid
     0: None,
 }
@@ -265,7 +268,7 @@ class ParseOpenSSLHeaders(object):
 
     openssl_ck_re = re.compile(
         r'^#\s*define\s+'
-        r'(?:SSL2|SSL3|TLS1)_CK_([A-Z0-9_]*)\s+'
+        r'(?:SSL2|SSL3|TLS1|TLS1_3)_CK_([A-Z0-9_]*)\s+'
         r'0x([0-9A-Fa-f]{8}).*'
     )
 
@@ -276,7 +279,7 @@ class ParseOpenSSLHeaders(object):
 
     openssl_txt_re = re.compile(
         r'^#\s*define\s+'
-        r'(?:SSL2|SSL3|TLS1)_TXT_([A-Z0-9_]*)\s+'
+        r'(?:SSL2|SSL3|TLS1|TLS1_3)_TXT_([A-Z0-9_]*)\s+'
         r'"(.*)".*'
     )
 
@@ -360,7 +363,7 @@ class ParseOpenSSLCipherSuite(object):
     ]
 
     define_re = re.compile(
-        (r'^\s*#\s*define\s+(?:SSL2|SSL3|TLS1)_(?:CK|TXT)')
+        (r'^\s*#\s*define\s+(?:SSL2|SSL3|TLS1|TLS1_3)_(?:CK|TXT)')
     )
 
     def __init__(self):
@@ -384,6 +387,8 @@ class ParseOpenSSLCipherSuite(object):
                 if extract:
                     if line.strip().startswith('#'):
                         # skip #ifdef / #endif
+                        continue
+                    if line.strip().startswith('*'):
                         continue
                     self.suite.append(line.rstrip())
                     if line.strip() == '};':
@@ -435,12 +440,15 @@ class ParseOpenSSLCipherSuite(object):
         tv = TRANSLATE_TLS_VERSION
         num = handle(2) & 65535
         hexid = '0x{:02X},0x{:02X}'.format((num >> 8) & 255, num & 255)
+        kea = handle(3)
+        auth = handle(4)
+
         cipher = dict(
             hexid=hexid,
             valid=bool(handle(0)),
             name=handle(1),
-            kea=handle(3),
-            auth=handle(4),
+            kea=kea if kea else None,
+            auth=auth if auth else None,
             enc=handle(5),
             mac=handle(6)
         )
@@ -486,6 +494,15 @@ class ParseOpenSSLCipherSuite(object):
 class TLSDB(object):
     iana_table_id = 'table-tls-parameters-4'
     source_files = FILES
+
+    tls13_draft = 'draft-ietf-tls-tls13-18'
+    tls13_draft_ciphers = {
+        '0x13,0x01': 'TLS_AES_128_GCM_SHA256',
+        '0x13,0x02': 'TLS_AES_256_GCM_SHA384',
+        '0x13,0x03': 'TLS_CHACHA20_POLY1305_SHA256',
+        '0x13,0x04': 'TLS_AES_128_CCM_SHA256',
+        '0x13,0x05': 'TLS_AES_128_CCM_8_SHA256',
+    }
 
     def __init__(self, downloaddir='downloads'):
         self.downloaddir = downloaddir
@@ -596,6 +613,19 @@ class TLSDB(object):
                 'iana': name,
                 'dtls': True if dtls_ok == 'Y' else False,
                 'rfcs': rfcs,
+            }
+            self.add_cipher(hexid, cipherdict)
+
+    def parse_tls13_draft(self):
+        lib = 'iana'
+        self.indexes.setdefault(lib, {})
+        for hexid, name in self.tls13_draft_ciphers.items():
+            hexid, num = _format_hexid(hexid)
+            cipherdict = {
+                'num': num,
+                'iana': name,
+                'dtls': True,
+                'rfcs': [self.tls13_draft],
             }
             self.add_cipher(hexid, cipherdict)
 
@@ -756,6 +786,7 @@ class TLSDB(object):
     def process(self, refresh=False):
         self.download(refresh)
         self.parse_iana()
+        self.parse_tls13_draft()
         self.parse_suite_strings()
         self.parse_gnutls()
         self.parse_nss()
@@ -783,7 +814,8 @@ class TLSDB(object):
             },
             'ciphers': self.ciphers,
             'indexes': self.indexes,
-            'flags': {name: sorted(value) for name, value in sorted(self.fields.items())},
+            'flags': {name: sorted(v for v in value if v)
+                      for name, value in sorted(self.fields.items())},
             'suites': suites,
         }
         if file is None:

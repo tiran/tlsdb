@@ -1,7 +1,7 @@
 {
   "about": {
     "author": "Christian Heimes",
-    "created": "20160816T17:03:40",
+    "created": "20170202T18:57:48",
     "email": "christian at python.org",
     "sources": {
       "gnutls-master": {
@@ -288,7 +288,8 @@
       "alg_bits": 168,
       "algo_strength": [
         "SSL_FIPS",
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aRSA",
       "dtls": true,
@@ -480,7 +481,8 @@
       "alg_bits": 168,
       "algo_strength": [
         "SSL_FIPS",
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aRSA",
       "dtls": true,
@@ -1402,7 +1404,7 @@
       "max_tls": "TLSv1.2",
       "min_dtls": "DTLS1_BAD_VER",
       "min_tls": "SSLv3",
-      "mod_nss": "camelia_128_sha",
+      "mod_nss": "camellia_128_sha",
       "mozilla_server_side": {
         "old": 52
       },
@@ -1561,7 +1563,7 @@
       "max_tls": "TLSv1.2",
       "min_dtls": "DTLSv1.2",
       "min_tls": "TLSv1.2",
-      "mod_nss": "dhe_rsa_aes_128_sha256",
+      "mod_nss": "dhe_rsa_aes_128_sha_256",
       "mozilla_server_side": {
         "intermediate": 16,
         "old": 18
@@ -1657,7 +1659,7 @@
       "max_tls": "TLSv1.2",
       "min_dtls": "DTLSv1.2",
       "min_tls": "TLSv1.2",
-      "mod_nss": "dhe_rsa_aes_256_sha256",
+      "mod_nss": "dhe_rsa_aes_256_sha_256",
       "mozilla_server_side": {
         "intermediate": 18,
         "old": 21
@@ -1756,7 +1758,7 @@
       "max_tls": "TLSv1.2",
       "min_dtls": "DTLS1_BAD_VER",
       "min_tls": "SSLv3",
-      "mod_nss": "camelia_256_sha",
+      "mod_nss": "camellia_256_sha",
       "mozilla_server_side": {
         "old": 44
       },
@@ -1930,7 +1932,8 @@
       "alg_bits": 168,
       "algo_strength": [
         "SSL_FIPS",
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aPSK",
       "dtls": true,
@@ -2055,7 +2058,8 @@
       "alg_bits": 168,
       "algo_strength": [
         "SSL_FIPS",
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aPSK",
       "dtls": true,
@@ -2180,7 +2184,8 @@
       "alg_bits": 168,
       "algo_strength": [
         "SSL_FIPS",
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aRSA",
       "dtls": true,
@@ -3642,6 +3647,84 @@
         "RFC5746"
       ]
     },
+    "0x13,0x01": {
+      "alg_bits": 128,
+      "algo_strength": [
+        "SSL_HIGH"
+      ],
+      "auth": null,
+      "dtls": true,
+      "enc": "SSL_AES128GCM",
+      "flags": [
+        "TLS1_PRF_SHA256",
+        "SSL_HANDSHAKE_MAC_SHA256"
+      ],
+      "gnutls": null,
+      "iana": "TLS_AES_128_GCM_SHA256",
+      "kea": null,
+      "mac": "SSL_AEAD",
+      "max_dtls": null,
+      "max_tls": "TLSv1.3",
+      "min_dtls": null,
+      "min_tls": "TLSv1.3",
+      "mod_nss": "aes_128_gcm_sha_256",
+      "nss": "TLS_AES_128_GCM_SHA256",
+      "num": 4865,
+      "openssl": "TLS13-AES-128-GCM-SHA256",
+      "openssl_num": "0x3001301",
+      "rfcs": [
+        "draft-ietf-tls-tls13-18"
+      ],
+      "strength_bits": 128
+    },
+    "0x13,0x02": {
+      "dtls": true,
+      "gnutls": null,
+      "iana": "TLS_AES_256_GCM_SHA384",
+      "mod_nss": "aes_256_gcm_sha_384",
+      "nss": "TLS_AES_256_GCM_SHA384",
+      "num": 4866,
+      "openssl": null,
+      "rfcs": [
+        "draft-ietf-tls-tls13-18"
+      ]
+    },
+    "0x13,0x03": {
+      "dtls": true,
+      "gnutls": null,
+      "iana": "TLS_CHACHA20_POLY1305_SHA256",
+      "mod_nss": "chacha20_poly1305_sha_256",
+      "nss": "TLS_CHACHA20_POLY1305_SHA256",
+      "num": 4867,
+      "openssl": null,
+      "rfcs": [
+        "draft-ietf-tls-tls13-18"
+      ]
+    },
+    "0x13,0x04": {
+      "dtls": true,
+      "gnutls": null,
+      "iana": "TLS_AES_128_CCM_SHA256",
+      "mod_nss": null,
+      "nss": null,
+      "num": 4868,
+      "openssl": null,
+      "rfcs": [
+        "draft-ietf-tls-tls13-18"
+      ]
+    },
+    "0x13,0x05": {
+      "dtls": true,
+      "gnutls": null,
+      "iana": "TLS_AES_128_CCM_8_SHA256",
+      "mod_nss": null,
+      "nss": null,
+      "num": 4869,
+      "openssl": null,
+      "rfcs": [
+        "draft-ietf-tls-tls13-18"
+      ]
+    },
     "0x56,0x00": {
       "dtls": true,
       "gnutls": null,
@@ -3787,7 +3870,8 @@
       "alg_bits": 168,
       "algo_strength": [
         "SSL_FIPS",
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aECDSA",
       "dtls": true,
@@ -4021,7 +4105,8 @@
       "alg_bits": 168,
       "algo_strength": [
         "SSL_FIPS",
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aRSA",
       "dtls": true,
@@ -4279,7 +4364,8 @@
     "0xC0,0x1A": {
       "alg_bits": 168,
       "algo_strength": [
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aSRP",
       "dtls": true,
@@ -4309,7 +4395,8 @@
     "0xC0,0x1B": {
       "alg_bits": 168,
       "algo_strength": [
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aRSA",
       "dtls": true,
@@ -4977,7 +5064,8 @@
       "alg_bits": 168,
       "algo_strength": [
         "SSL_FIPS",
-        "SSL_MEDIUM"
+        "SSL_MEDIUM",
+        "SSL_NOT_DEFAULT"
       ],
       "auth": "SSL_aPSK",
       "dtls": true,
@@ -7257,7 +7345,7 @@
       "max_tls": "TLSv1.2",
       "min_dtls": "DTLSv1.2",
       "min_tls": "TLSv1.2",
-      "mod_nss": null,
+      "mod_nss": "ecdhe_rsa_chacha20_poly1305_sha_256",
       "mozilla_server_side": {
         "intermediate": 1,
         "modern": 3,
@@ -7292,7 +7380,7 @@
       "max_tls": "TLSv1.2",
       "min_dtls": "DTLSv1.2",
       "min_tls": "TLSv1.2",
-      "mod_nss": null,
+      "mod_nss": "ecdhe_ecdsa_chacha20_poly1305_sha_256",
       "mozilla_server_side": {
         "intermediate": 0,
         "modern": 2,
@@ -7327,7 +7415,7 @@
       "max_tls": "TLSv1.2",
       "min_dtls": "DTLSv1.2",
       "min_tls": "TLSv1.2",
-      "mod_nss": null,
+      "mod_nss": "dhe_rsa_chacha20_poly1305_sha_256",
       "mozilla_server_side": {
         "old": 36
       },
@@ -7707,6 +7795,11 @@
       "TLS_SRP_SHA_RSA_AES_256_CBC_SHA1": "0xC0,0x21"
     },
     "iana": {
+      "TLS_AES_128_CCM_8_SHA256": "0x13,0x05",
+      "TLS_AES_128_CCM_SHA256": "0x13,0x04",
+      "TLS_AES_128_GCM_SHA256": "0x13,0x01",
+      "TLS_AES_256_GCM_SHA384": "0x13,0x02",
+      "TLS_CHACHA20_POLY1305_SHA256": "0x13,0x03",
       "TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA": "0x00,0x11",
       "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA": "0x00,0x13",
       "TLS_DHE_DSS_WITH_AES_128_CBC_SHA": "0x00,0x32",
@@ -8035,19 +8128,23 @@
       "TLS_SRP_SHA_WITH_AES_256_CBC_SHA": "0xC0,0x20"
     },
     "mod_nss": {
+      "aes_128_gcm_sha_256": "0x13,0x01",
       "aes_128_sha_256": "0x00,0x3C",
+      "aes_256_gcm_sha_384": "0x13,0x02",
       "aes_256_sha_256": "0x00,0x3D",
-      "camelia_128_sha": "0x00,0x41",
-      "camelia_256_sha": "0x00,0x84",
+      "camellia_128_sha": "0x00,0x41",
+      "camellia_256_sha": "0x00,0x84",
+      "chacha20_poly1305_sha_256": "0x13,0x03",
       "dhe_rsa_3des_sha": "0x00,0x16",
       "dhe_rsa_aes_128_gcm_sha_256": "0x00,0x9E",
       "dhe_rsa_aes_128_sha": "0x00,0x33",
-      "dhe_rsa_aes_128_sha256": "0x00,0x67",
+      "dhe_rsa_aes_128_sha_256": "0x00,0x67",
       "dhe_rsa_aes_256_gcm_sha_384": "0x00,0x9F",
       "dhe_rsa_aes_256_sha": "0x00,0x39",
-      "dhe_rsa_aes_256_sha256": "0x00,0x6B",
+      "dhe_rsa_aes_256_sha_256": "0x00,0x6B",
       "dhe_rsa_camellia_128_sha": "0x00,0x45",
       "dhe_rsa_camellia_256_sha": "0x00,0x88",
+      "dhe_rsa_chacha20_poly1305_sha_256": "0xCC,0xAA",
       "dhe_rsa_des_sha": "0x00,0x15",
       "ecdh_anon_3des_sha": "0xC0,0x17",
       "ecdh_anon_aes_128_sha": "0xC0,0x18",
@@ -8071,6 +8168,7 @@
       "ecdhe_ecdsa_aes_256_gcm_sha_384": "0xC0,0x2C",
       "ecdhe_ecdsa_aes_256_sha": "0xC0,0x0A",
       "ecdhe_ecdsa_aes_256_sha_384": "0xC0,0x24",
+      "ecdhe_ecdsa_chacha20_poly1305_sha_256": "0xCC,0xA9",
       "ecdhe_ecdsa_null_sha": "0xC0,0x06",
       "ecdhe_ecdsa_rc4_128_sha": "0xC0,0x07",
       "ecdhe_rsa_3des_sha": "0xC0,0x12",
@@ -8080,6 +8178,7 @@
       "ecdhe_rsa_aes_256_gcm_sha_384": "0xC0,0x30",
       "ecdhe_rsa_aes_256_sha": "0xC0,0x14",
       "ecdhe_rsa_aes_256_sha_384": "0xC0,0x28",
+      "ecdhe_rsa_chacha20_poly1305_sha_256": "0xCC,0xA8",
       "ecdhe_rsa_null": "0xC0,0x10",
       "ecdhe_rsa_rc4_128_sha": "0xC0,0x11",
       "null_sha_256": "0x00,0x3B",
@@ -8097,6 +8196,9 @@
       "rsa_rc4_40_md5": "0x00,0x03"
     },
     "nss": {
+      "TLS_AES_128_GCM_SHA256": "0x13,0x01",
+      "TLS_AES_256_GCM_SHA384": "0x13,0x02",
+      "TLS_CHACHA20_POLY1305_SHA256": "0x13,0x03",
       "TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA": "0x00,0x11",
       "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA": "0x00,0x13",
       "TLS_DHE_DSS_WITH_AES_128_CBC_SHA": "0x00,0x32",
@@ -8443,7 +8545,8 @@
       "SRP-DSS-AES-256-CBC-SHA": "0xC0,0x22",
       "SRP-RSA-3DES-EDE-CBC-SHA": "0xC0,0x1B",
       "SRP-RSA-AES-128-CBC-SHA": "0xC0,0x1E",
-      "SRP-RSA-AES-256-CBC-SHA": "0xC0,0x21"
+      "SRP-RSA-AES-256-CBC-SHA": "0xC0,0x21",
+      "TLS13-AES-128-GCM-SHA256": "0x13,0x01"
     }
   },
   "suites": {
